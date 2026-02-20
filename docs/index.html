@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAO-AGI Technical Documentation</title>
+  <meta name="description" content="A symbolic reasoning benchmark for evaluating tactical board state completion in Large Language Models.">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['-apple-system', 'BlinkMacSystemFont', '"SF Pro Text"', '"SF Pro Display"', '"Segoe UI"', 'Roboto', 'Helvetica', 'Arial', 'sans-serif'],
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', '"Liberation Mono"', '"Courier New"', 'monospace'],
+          },
+          colors: {
+            apple: {
+              gray: '#f5f5f7',
+              dark: '#1d1d1f',
+              blue: '#0066cc',
+              border: '#d2d2d7'
+            }
+          },
+          animation: {
+            'drop': 'dropIn 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both',
+          },
+          keyframes: {
+            dropIn: {
+              '0%': { transform: 'translateY(-150px)', opacity: '0' },
+              '100%': { transform: 'translateY(0)', opacity: '1' }
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      color: #1d1d1f;
+      background-color: #ffffff;
+    }
+    
+    .syntax-key { color: #9cdcfe; }
+    .syntax-str { color: #ce9178; }
+    .syntax-punct { color: #d4d4d4; }
+    .syntax-comment { color: #6a9955; }
+    
+    ::selection {
+      background-color: #0066cc;
+      color: white;
+    }
+  </style>
+</head>
+<body class="bg-white">
+
+  <!-- Navigation -->
+  <nav class="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-apple-border/50">
+    <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+      <a href="#" class="flex items-center gap-2 text-apple-dark font-semibold tracking-tight text-sm">
+        <div class="flex gap-1">
+          <div class="w-3 h-3 rounded-full bg-apple-dark"></div>
+          <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+          <div class="w-3 h-3 rounded-full bg-apple-dark"></div>
+          <div class="w-3 h-3 rounded-full bg-gray-300"></div>
+        </div>
+        RAO-AGI Documentation
+      </a>
+      <ul class="flex items-center gap-6 text-xs font-medium text-gray-500">
+        <li><a href="#specification" class="hover:text-apple-dark transition-colors">Specification</a></li>
+        <li><a href="#format" class="hover:text-apple-dark transition-colors">Data Format</a></li>
+        <li><a href="#run" class="hover:text-apple-dark transition-colors">Execution</a></li>
+        <li><a href="#scoring" class="hover:text-apple-dark transition-colors">Metrics</a></li>
+        <li><a href="https://github.com/pranavra0/RAO-AGI" target="_blank" class="hover:text-apple-dark transition-colors flex items-center gap-1">Source <span class="font-mono text-[10px]">↗</span></a></li>
+      </ul>
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="pt-32 pb-24 px-6 overflow-hidden">
+    <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 lg:gap-8 items-center">
+      <div class="max-w-xl">
+        <h1 class="text-5xl lg:text-[4rem] font-semibold tracking-tighter text-apple-dark leading-[1.05] mb-6">
+          Symbolic Reasoning Benchmark
+        </h1>
+        <p class="text-lg lg:text-xl text-gray-500 font-medium tracking-tight mb-10 leading-relaxed">
+          RAO-AGI evaluates discrete tactical reasoning through single-step Connect Four board state completions.
+          Designed as a data-centric benchmark for Large Language Models.
+        </p>
+        <div class="flex flex-wrap items-center gap-4">
+          <a href="https://github.com/pranavra0/RAO-AGI/archive/refs/heads/main.zip" class="bg-apple-dark text-white text-sm font-semibold py-3 px-6 rounded-full hover:bg-black transition-colors shadow-sm">
+            Download Dataset
+          </a>
+          <a href="#run" class="bg-apple-gray text-apple-dark text-sm font-semibold py-3 px-6 rounded-full hover:bg-gray-200 transition-colors">
+            Execution Guide &rarr;
+          </a>
+        </div>
+      </div>
+      
+      <!-- Visualization Component -->
+      <div class="flex justify-center lg:justify-end">
+        <div class="bg-apple-gray/50 border border-apple-border/40 p-6 rounded-[2rem] shadow-sm backdrop-blur-sm">
+          <div id="hero-board" class="flex flex-col gap-2"></div>
+          <div class="mt-4 text-center">
+            <p class="text-[11px] font-mono text-gray-500 tracking-wide uppercase">
+              Tactical completion: Column <strong class="text-apple-dark font-bold text-xs">4</strong>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dataset Composition -->
+  <div class="bg-apple-gray border-y border-apple-border/50 py-12">
+    <div class="max-w-7xl mx-auto px-6 grid grid-cols-2 md:grid-cols-4 gap-8 divide-x divide-apple-border/40">
+      <div class="flex flex-col items-center text-center px-4">
+        <span class="text-5xl font-semibold tracking-tighter text-apple-dark mb-2">50</span>
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-relaxed">Training Tasks<br>Solutions Provided</span>
+      </div>
+      <div class="flex flex-col items-center text-center px-4">
+        <span class="text-5xl font-semibold tracking-tighter text-apple-dark mb-2">50</span>
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-relaxed">Evaluation Tasks<br>Solutions Withheld</span>
+      </div>
+      <div class="flex flex-col items-center text-center px-4 border-t border-apple-border/40 md:border-t-0 pt-8 md:pt-0">
+        <span class="text-5xl font-semibold tracking-tighter text-apple-dark mb-2">7</span>
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-relaxed">Tactical Categories<br>Win / Block / Diagonal</span>
+      </div>
+      <div class="flex flex-col items-center text-center px-4 border-t border-apple-border/40 md:border-t-0 pt-8 md:pt-0">
+        <span class="text-5xl font-semibold tracking-tighter text-apple-dark mb-2">14%</span>
+        <span class="text-[11px] font-semibold text-gray-500 uppercase tracking-widest leading-relaxed">Random Baseline<br>Uniform Distribution</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Technical Specification -->
+  <section id="specification" class="py-24 lg:py-32 px-6 border-b border-apple-border/50">
+    <div class="max-w-7xl mx-auto">
+      <p class="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">§ 01 — Technical Specification</p>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-7">
+          <h2 class="text-4xl lg:text-5xl font-semibold tracking-tighter text-apple-dark leading-tight mb-8">
+            Tactical board state evaluation.
+          </h2>
+          <div class="space-y-6 text-lg text-gray-600 tracking-tight leading-relaxed">
+            <p>
+              RAO-AGI assesses a model's capacity to interpret symbolic board representations and select the optimal move in a 
+              deterministic, perfect-information environment. Unlike standard game benchmarks that require deep-tree search, 
+              this set focuses on single-step tactical recognition.
+            </p>
+            <p>
+              Board configurations are represented as a 6x7 grid of symbolic characters.
+              <strong class="text-apple-dark font-semibold">A</strong> identifies the current agent, 
+              <strong class="text-apple-dark font-semibold">B</strong> identifying the adversary, and 
+              <strong class="text-apple-dark font-semibold">.</strong> representing null space.
+            </p>
+            <p>
+              Task validity is confirmed by human baseline tests; each board state contains an unambiguous optimal move 
+              identifiable through visual inspection and basic rule application.
+            </p>
+          </div>
+        </div>
+        
+        <div class="lg:col-span-5 lg:pl-8">
+          <ul class="space-y-4 text-sm font-medium tracking-tight text-gray-600 pt-2 border-t border-apple-border/40 lg:border-t-0 lg:pt-0">
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30">
+              <span class="text-apple-dark font-bold shrink-0">✓</span> 
+              Static state-to-decision evaluation
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30">
+              <span class="text-apple-dark font-bold shrink-0">✓</span> 
+              Zero-dependency JSON data structure
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30">
+              <span class="text-apple-dark font-bold shrink-0">✓</span> 
+              Deterministic tactical completions
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30">
+              <span class="text-apple-dark font-bold shrink-0">✓</span> 
+              Multi-directional win and block patterns
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30">
+              <span class="text-apple-dark font-bold shrink-0">✓</span> 
+              Cross-provider evaluation harness
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30 text-gray-400">
+              <span class="font-bold shrink-0">✕</span> 
+              Not a simulation environment
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30 text-gray-400">
+              <span class="font-bold shrink-0">✕</span> 
+              Not a training dataset
+            </li>
+            <li class="flex items-start gap-4 pb-4 border-b border-apple-border/30 text-gray-400">
+              <span class="font-bold shrink-0">✕</span> 
+              Not a test of lookahead depth
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Data Format -->
+  <section id="format" class="py-24 lg:py-32 px-6 border-b border-apple-border/50 bg-[#fafafa]">
+    <div class="max-w-7xl mx-auto">
+      <p class="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">§ 02 — Data Format</p>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-6">
+          <h2 class="text-4xl font-semibold tracking-tighter text-apple-dark leading-tight mb-6">
+            Standardized JSON schema.
+          </h2>
+          <div class="space-y-6 text-lg text-gray-600 tracking-tight leading-relaxed mb-10">
+            <p>
+              Each task is encapsulated in a single JSON object. Training instances contain a 
+              <strong class="text-apple-dark font-semibold">solution</strong> attribute, which is withheld in evaluation instances.
+            </p>
+            <p>
+              The board array is ordered top-to-bottom. Standard gravitational physics apply: chips populate the 
+              lowest available index within a target column. Current agent is consistently defined as <strong class="text-apple-dark font-semibold">A</strong>.
+            </p>
+          </div>
+          
+          <div>
+            <p class="text-[10px] font-mono font-bold text-gray-400 tracking-widest uppercase mb-3 ml-1">Example: train_003.json</p>
+            <div class="bg-[#1e1e1e] rounded-[1.25rem] p-6 shadow-xl overflow-x-auto border border-white/10">
+<pre class="font-mono text-[13px] leading-loose"><span class="syntax-punct">{</span>
+  <span class="syntax-key">"id"</span><span class="syntax-punct">:</span> <span class="syntax-str">"train_003"</span><span class="syntax-punct">,</span>
+  <span class="syntax-key">"board"</span><span class="syntax-punct">:</span> <span class="syntax-punct">[</span>
+    <span class="syntax-str">"......."</span><span class="syntax-punct">,</span>   <span class="syntax-comment">// row 0 (top)</span>
+    <span class="syntax-str">"......."</span><span class="syntax-punct">,</span>
+    <span class="syntax-str">"......."</span><span class="syntax-punct">,</span>
+    <span class="syntax-str">"...AB.."</span><span class="syntax-punct">,</span>
+    <span class="syntax-str">"..ABB.."</span><span class="syntax-punct">,</span>
+    <span class="syntax-str">".ABBB.."</span>    <span class="syntax-comment">// row 5 (bottom)</span>
+  <span class="syntax-punct">],</span>
+  <span class="syntax-key">"current_player"</span><span class="syntax-punct">:</span> <span class="syntax-str">"A"</span><span class="syntax-punct">,</span>
+  <span class="syntax-key">"columns"</span><span class="syntax-punct">:</span> <span class="syntax-punct">[</span><span class="syntax-str">"0"</span><span class="syntax-punct">,</span><span class="syntax-str">"1"</span><span class="syntax-punct">,</span><span class="syntax-str">"2"</span><span class="syntax-punct">,</span><span class="syntax-str">"3"</span><span class="syntax-punct">,</span><span class="syntax-str">"4"</span><span class="syntax-punct">,</span><span class="syntax-str">"5"</span><span class="syntax-punct">,</span><span class="syntax-str">"6"</span><span class="syntax-punct">],</span>
+  <span class="syntax-key">"solution"</span><span class="syntax-punct">:</span> <span class="syntax-str">"4"</span>
+<span class="syntax-punct">}</span></pre>
+            </div>
+          </div>
+        </div>
+
+        <div class="lg:col-span-6 flex flex-col items-center justify-center lg:mt-12">
+          <div class="bg-white border border-apple-border p-8 rounded-[2rem] shadow-sm flex flex-col items-center">
+            <div id="demo-board" class="flex flex-col gap-2"></div>
+            <p class="mt-8 text-sm text-gray-500 font-medium text-center">
+              Visual validation of tactical solution at column <strong class="text-apple-dark font-semibold">4</strong>.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Execution Guide -->
+  <section id="run" class="py-24 lg:py-32 px-6 border-b border-apple-border/50">
+    <div class="max-w-7xl mx-auto">
+      <p class="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">§ 03 — Execution Guide</p>
+      
+      <h2 class="text-4xl font-semibold tracking-tighter text-apple-dark leading-tight mb-4">
+        Evaluation Infrastructure
+      </h2>
+      <p class="text-lg text-gray-600 tracking-tight leading-relaxed max-w-3xl mb-12">
+        The benchmark includes a Python-based evaluation harness supporting local and cloud-based providers. 
+        Submission manifests are generated in JSON format for compatibility with the validation utility.
+      </p>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-16">
+        <!-- Provider Cards -->
+        <div class="bg-apple-gray rounded-[2rem] p-6 border border-apple-border/60">
+          <div class="inline-block bg-white text-apple-dark text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-gray-200">Local</div>
+          <h3 class="text-lg font-semibold tracking-tight text-apple-dark mb-2">Ollama</h3>
+          <p class="text-xs text-gray-500 leading-relaxed mb-6 h-12">Local inference server support for open-weights models.</p>
+          <div class="bg-white border border-gray-200 rounded-xl p-3 font-mono text-[10px] text-apple-dark leading-relaxed">
+            python eval/run_eval.py \<br>
+            &nbsp;&nbsp;--provider ollama \<br>
+            &nbsp;&nbsp;--model llama3.2
+          </div>
+        </div>
+
+        <div class="bg-apple-gray rounded-[2rem] p-6 border border-apple-border/60">
+          <div class="inline-block bg-white text-apple-dark text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-gray-200">Cloud API</div>
+          <h3 class="text-lg font-semibold tracking-tight text-apple-dark mb-2">OpenAI</h3>
+          <p class="text-xs text-gray-500 leading-relaxed mb-6 h-12">Support for GPT-4 series and compatible endpoints.</p>
+          <div class="bg-white border border-gray-200 rounded-xl p-3 font-mono text-[10px] text-apple-dark leading-relaxed">
+            python eval/run_eval.py \<br>
+            &nbsp;&nbsp;--provider openai \<br>
+            &nbsp;&nbsp;--model gpt-4o-mini
+          </div>
+        </div>
+
+        <div class="bg-apple-gray rounded-[2rem] p-6 border border-apple-border/60">
+          <div class="inline-block bg-white text-apple-dark text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-gray-200">Low Latency</div>
+          <h3 class="text-lg font-semibold tracking-tight text-apple-dark mb-2">Groq</h3>
+          <p class="text-xs text-gray-500 leading-relaxed mb-6 h-12">Optimized inference for high-throughput evaluation.</p>
+          <div class="bg-white border border-gray-200 rounded-xl p-3 font-mono text-[10px] text-apple-dark leading-relaxed">
+            python eval/run_eval.py \<br>
+            &nbsp;&nbsp;--provider groq \<br>
+            &nbsp;&nbsp;--model llama-3.3-70b-versatile
+          </div>
+        </div>
+
+        <div class="bg-apple-gray rounded-[2rem] p-6 border border-apple-border/60">
+          <div class="inline-block bg-white text-apple-dark text-[10px] font-bold tracking-widest uppercase px-3 py-1 rounded-full mb-4 border border-gray-200">Optimized</div>
+          <h3 class="text-lg font-semibold tracking-tight text-apple-dark mb-2">Anthropic</h3>
+          <p class="text-xs text-gray-500 leading-relaxed mb-6 h-12">Native integration with Claude 3.5 series models.</p>
+          <div class="bg-white border border-gray-200 rounded-xl p-3 font-mono text-[10px] text-apple-dark leading-relaxed">
+            python eval/run_eval.py \<br>
+            &nbsp;&nbsp;--provider anthropic \<br>
+            &nbsp;&nbsp;--model claude-haiku-4-5-20251001
+          </div>
+        </div>
+      </div>
+
+      <!-- Advanced Configuration -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+        <div class="bg-[#1e1e1e] rounded-2xl overflow-hidden shadow-2xl border border-[#333]">
+          <div class="bg-[#2d2d2f] px-4 py-3 flex gap-2 items-center border-b border-black/50">
+            <div class="w-3 h-3 rounded-full bg-[#ff5f56]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#ffbd2e]"></div>
+            <div class="w-3 h-3 rounded-full bg-[#27c93f]"></div>
+          </div>
+          <div class="p-6 font-mono text-[13px] leading-loose text-gray-300 overflow-x-auto">
+            <span class="text-gray-500">// Pipeline integration</span><br>
+            <span class="text-gray-100">$ </span>python eval/run_eval.py --provider ollama | python score.py /dev/stdin<br><br>
+
+            <span class="text-gray-500">// Chain-of-Thought (CoT) evaluation</span><br>
+            <span class="text-gray-100">$ </span>python eval/run_eval.py --provider groq --prompt cot --output out.json
+          </div>
+        </div>
+
+        <div class="bg-apple-gray rounded-2xl p-6 lg:p-8 font-mono text-[13px] leading-loose text-apple-dark border border-apple-border/50 h-fit">
+          <div class="flex"><span class="font-bold w-24 shrink-0">--provider</span> <span>Target inference backend</span></div>
+          <div class="flex"><span class="font-bold w-24 shrink-0">--prompt</span> <span>minimal | cot</span></div>
+          <div class="flex"><span class="font-bold w-24 shrink-0">--split</span> <span>training | evaluation</span></div>
+          <div class="flex"><span class="font-bold w-24 shrink-0">--tasks</span> <span>Execution task limit</span></div>
+          <div class="flex"><span class="font-bold w-24 shrink-0">--verbose</span> <span>Enable detailed response logging</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Metrics Section -->
+  <section id="scoring" class="py-24 lg:py-32 px-6 bg-[#fafafa]">
+    <div class="max-w-7xl mx-auto">
+      <p class="text-xs font-semibold text-gray-400 tracking-widest uppercase mb-4">§ 04 — Evaluation Metrics</p>
+      
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-16 items-start">
+        <div class="lg:col-span-6">
+          <h2 class="text-4xl font-semibold tracking-tighter text-apple-dark leading-tight mb-8">
+            Validation and Scoring.
+          </h2>
+          <div class="space-y-6 text-lg text-gray-600 tracking-tight leading-relaxed">
+            <p>
+              Submissions are structured as JSON maps of task identifiers to column selections. 
+              The validation script compares these selections against expected tactical solutions.
+            </p>
+            <p>
+              Model performance is quantified via raw accuracy. Expected performance for models 
+              demonstrating strong symbolic reasoning is <strong class="text-apple-dark font-semibold">100%</strong> 
+              across tactical win/block scenarios.
+            </p>
+          </div>
+        </div>
+        
+        <div class="lg:col-span-6 flex flex-col gap-6">
+          <div class="bg-[#1e1e1e] rounded-2xl p-6 shadow-xl border border-white/10 overflow-x-auto">
+<pre class="font-mono text-[13px] leading-loose"><span class="syntax-punct">{</span>
+  <span class="syntax-key">"train_001"</span><span class="syntax-punct">:</span> <span class="syntax-str">"5"</span><span class="syntax-punct">,</span>
+  <span class="syntax-key">"train_002"</span><span class="syntax-punct">:</span> <span class="syntax-str">"4"</span><span class="syntax-punct">,</span>
+  <span class="syntax-comment">...</span>
+<span class="syntax-punct">}</span></pre>
+          </div>
+
+          <div class="bg-[#1e1e1e] rounded-2xl overflow-hidden border border-[#333]">
+            <div class="p-6 font-mono text-[13px] leading-loose text-gray-300">
+              <span class="text-gray-100">$ </span>python score.py submission.json<br>
+              &nbsp;<br>
+              &nbsp;&nbsp;train_001  →  5  <span class="text-green-400">✓</span><br>
+              &nbsp;&nbsp;train_004  →  0  <span class="text-red-400">✕  (expected 2)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA Section -->
+  <section class="bg-apple-gray py-24 px-6 text-center border-b border-apple-border/50">
+    <div class="max-w-3xl mx-auto">
+      <h2 class="text-3xl font-semibold tracking-tighter text-apple-dark mb-4">Start Evaluation</h2>
+      <p class="text-gray-500 font-medium mb-10">Access the dataset and documentation on GitHub.</p>
+      <div class="flex flex-wrap justify-center gap-4">
+        <a href="https://github.com/pranavra0/RAO-AGI" class="bg-apple-dark text-white text-sm font-semibold py-3 px-8 rounded-full hover:bg-black transition-colors shadow-sm">
+          GitHub Repository
+        </a>
+        <a href="https://github.com/pranavra0/RAO-AGI/blob/main/README.md" class="bg-white border border-apple-border text-apple-dark text-sm font-semibold py-3 px-8 rounded-full hover:bg-gray-50 transition-colors">
+          Technical README
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="bg-white py-12 px-6 border-t border-apple-border/30">
+    <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
+      <div class="flex items-center gap-3 text-apple-dark font-semibold tracking-tight text-sm">
+        <div class="flex gap-1">
+          <div class="w-2.5 h-2.5 rounded-full bg-apple-dark"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-apple-dark"></div>
+          <div class="w-2.5 h-2.5 rounded-full bg-gray-300"></div>
+        </div>
+        RAO-AGI Benchmark
+      </div>
+      <div class="flex items-center gap-6 text-xs font-medium text-gray-400">
+        <a href="https://github.com/pranavra0/RAO-AGI" target="_blank" class="hover:text-apple-dark transition-colors">Source</a>
+        <a href="https://x.com/joseph_h_garvin/status/2024546125873659931" target="_blank" class="hover:text-apple-dark transition-colors">Inspiration</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      function renderBoard(elementId, boardStrArray, solutionCol, isHero = false) {
+        const container = document.getElementById(elementId);
+        container.innerHTML = '';
+        const baseClasses = 'w-10 h-10 sm:w-12 sm:h-12 rounded-full relative flex items-center justify-center transition-all duration-500 ';
+        
+        boardStrArray.forEach((row, ri) => {
+          const rowDiv = document.createElement('div');
+          rowDiv.className = 'flex gap-1.5 sm:gap-2';
+          row.split('').forEach((cell, ci) => {
+            const cellDiv = document.createElement('div');
+            if (cell === '.') {
+              cellDiv.className = baseClasses + 'bg-white shadow-[inset_0_2px_4px_rgba(0,0,0,0.06)] border border-gray-200';
+            } else if (cell === 'A') {
+              let animClass = (isHero && ri === 2 && ci === solutionCol) ? 'animate-drop' : '';
+              cellDiv.className = baseClasses + 'bg-apple-dark shadow-sm border border-black/10 ' + animClass;
+            } else if (cell === 'B') {
+              cellDiv.className = baseClasses + 'bg-gray-300 shadow-sm border border-black/5';
+            }
+            rowDiv.appendChild(cellDiv);
+          });
+          container.appendChild(rowDiv);
+        });
+        
+        const colsDiv = document.createElement('div');
+        colsDiv.className = 'flex gap-1.5 sm:gap-2 mt-2';
+        for(let i=0; i<7; i++) {
+          const colDiv = document.createElement('div');
+          const isSol = i === solutionCol;
+          colDiv.className = 'w-10 sm:w-12 text-center text-[10px] font-mono tracking-widest pt-1 ' + 
+                             (isSol ? 'text-apple-dark font-bold' : 'text-gray-400 font-medium');
+          colDiv.textContent = isSol ? '▲' : String(i);
+          colsDiv.appendChild(colDiv);
+        }
+        container.appendChild(colsDiv);
+      }
+
+      const boardData = [".......",".......","....A..","...AB..","..ABB..",".ABBB.."];
+      renderBoard('hero-board', boardData, 4, true);
+      renderBoard('demo-board', boardData, 4, false);
+    });
+  </script>
+</body>
+</html>

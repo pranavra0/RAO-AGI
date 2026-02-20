@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>RAO-AGI</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="container">
+    <h1>RAO-AGI</h1>
+    <p class="subtitle">Connect Four board state benchmark — testing interface</p>
+
+    <div id="controls">
+      <label for="file-input">Load task:</label>
+      <input type="file" id="file-input" accept=".json">
+    </div>
+
+    <div id="task-info" class="hidden">
+      <p><strong>Task:</strong> <span id="task-id"></span></p>
+      <p><strong>Current player:</strong> A</p>
+    </div>
+
+    <div id="board-area" class="hidden">
+      <div id="column-buttons"></div>
+      <div id="board"></div>
+    </div>
+
+    <div id="result" class="hidden"></div>
+
+    <div id="solution-area" class="hidden">
+      <p><strong>Solution:</strong> <span id="solution-value"></span></p>
+    </div>
+  </div>
+
+  <script src="testing_interface.js"></script>
+</body>
+</html>
