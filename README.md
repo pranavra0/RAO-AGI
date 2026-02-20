@@ -39,7 +39,7 @@ RAO-AGI/
 ## Quick Start
 
 ### 1. Run the evaluation
-The `eval/run_eval.py` script supports Ollama (local), Groq, and Anthropic out of the box.
+The `eval/run_eval.py` script supports Ollama (local), Groq, OpenAI, and Anthropic out of the box.
 
 ```bash
 # Run with Ollama (completely free)
