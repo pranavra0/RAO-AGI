@@ -2,26 +2,13 @@
 
 **"Can your AI play Connect Four? No, seriously."**
 
-RAO-AGI is a minimal research benchmark for evaluating symbolic reasoning over Connect Four board states. It is modeled after [ARC-AGI](https://github.com/fchollet/ARC-AGI) in structure and philosophy: data-centric, static files, and zero-bullshit.
-
----
-
-## Inspiration
-
-This project was inspired by the realization that while we're chasing AGI, many models still struggle with basic spatial and tactical reasoning in simple, deterministic games.
-
-> "A research benchmark for AI that is, embarrassingly, just Connect Four."
-> — Inspired by [this tweet](https://x.com/joseph_h_garvin/status/2024546125873659931)
+RAO-AGI is a minimal research benchmark for evaluating symbolic reasoning over Connect Four board states. It is modeled after [ARC-AGI](https://github.com/fchollet/ARC-AGI) in structure and philosophy: data-centric, static files.
 
 ---
 
 ## What is this?
 
 A collection of 100 frozen Connect Four board states (50 training, 50 evaluation). Each task presents a board and asks for a single column index representing the best legal move for the current player.
-
-- **One board.**
-- **One move.**
-- **Just don't embarrass yourself.**
 
 Tasks are human-solvable by inspection. A person who has played Connect Four should score 100%. If your model can't, that's a benchmark result worth knowing.
 
@@ -81,8 +68,4 @@ Open `app/index.html` directly in your browser to manually inspect tasks and tes
 - **B** is the opponent.
 - `.` is an empty cell.
 
----
 
-## Contributing
-
-Created by [@pranavra0](https://github.com/pranavra0). If you find a bug or have a suggestion, open an issue or a PR. Let's make AGI happen, one Connect Four move at a time.
