@@ -1,7 +1,5 @@
 # RAO-AGI
 
-**"Can your AI play Connect Four? No, seriously."**
-
 RAO-AGI is a minimal research benchmark for evaluating symbolic reasoning over Connect Four board states. It is modeled after [ARC-AGI](https://github.com/fchollet/ARC-AGI) in structure and philosophy: data-centric, static files.
 
 ---
