@@ -102,18 +102,29 @@ def format_user_prompt(task):
 
 def parse_response(text, prompt_format):
     """Parses model output to extract the column choice."""
+    if not text:
+        return None
+    
     text = text.strip()
+    
     if prompt_format == "cot":
         match = re.search(r"ANSWER\s*:\s*([0-6])", text, re.IGNORECASE)
         if match:
             return match.group(1)
+
     for line in text.splitlines():
         line = line.strip()
         if re.fullmatch(r"[0-6]", line):
             return line
+
     match = re.search(r"\b([0-6])\b", text)
     if match:
         return match.group(1)
+    
+    match = re.search(r"([0-6])", text)
+    if match:
+        return match.group(1)
+
     return None
 
 def is_legal(task, col_str):
