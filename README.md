@@ -1,6 +1,6 @@
 # RAO-AGI
 
-RAO-AGI is a minimal research benchmark for evaluating symbolic reasoning over Connect Four board states. It is modeled after [ARC-AGI](https://github.com/fchollet/ARC-AGI) in structure and philosophy: data-centric, static files.
+RAO-AGI is a minimal research benchmark for evaluating symbolic reasoning over Connect Four board states. No this is not a serious project. Yes the name "RAO-AGI" is a joke. This will mainly be the tool I use to benchmark spatial reasoning of new models. 
 
 ---
 
@@ -67,3 +67,9 @@ Open `app/index.html` directly in your browser to manually inspect tasks and tes
 - `.` is an empty cell.
 
 
+## Things to do
+
+- More test and eval states - 100 is not enough obviously
+- more model support needed
+- full game playthrough with comp to min-max - this might go against the idea of this but it's worth trying. You can assume a reasonably intelligent thing should do close to optimal moves if the intelligence is generalizable ? I don't know if this is true actually now that I write this out
+- harness bugs - there are a lot of them 
